@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Time Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  :root{
+    --paper:#FDFCF9;
+    --ink:#2B2B28;
+    --muted:#9C9C94;
+    --hair:#E4E2D9;
+    --sage-outer:#6F8B72;
+    --accent:#7C9473;
+    --weekend-tint: rgba(124,148,115,0.22);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ overflow-x:hidden; }
+
+  .tracker-shell{
+    background:var(--sage-outer);
+    padding:36px 16px;
+    overflow-x:hidden;
+    width:100%;
+  }
+
+  .page{
+    max-width:1180px;
+    width:100%;
+    margin:0 auto;
+    background:var(--paper);
+    box-shadow:0 18px 40px rgba(0,0,0,0.18);
+    padding:44px 40px 36px;
+    box-sizing:border-box;
+    overflow-x:hidden;
+  }
+
+  /* ---------- Header ---------- */
+  .title-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .title-row .dot{
+    width:16px;height:16px;
+    border:2px solid var(--ink);
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  h1{
+    font-family:'Poppins', sans-serif;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:4px;
+    margin:0;
+  }
+  .subtitle{
+    margin:10px 0 0 28px;
+    font-size:13px;
+    color:var(--muted);
+    font-style:italic;
+  }
+
+  /* ---------- Month nav ---------- */
+  .month-bar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:26px 0 4px 28px;
+  }
+  .month-bar .nav-btn{
+    width:30px;height:30px;
+    border-radius:50%;
+    border:1px solid var(--hair);
+    background:#fff;
+    color:var(--ink);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s ease;
+  }
+  .month-bar .nav-btn:hover{ background:#F2F1EA; }
+  .month-label{
+    font-family:'Poppins', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    min-width:170px;
+  }
+
+  /* ---------- Toolbar (digital only) ---------- */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:16px 0 6px 28px;
+    align-items:center;
+  }
+  .toolbar button{
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    padding:8px 14px;
+    border-radius:20px;
+    border:1px solid var(--hair);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .toolbar button:hover{ background:#F4F3EE; border-color:#D8D6CB; }
+  .toolbar button.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .toolbar button.primary:hover{ background:#688361; }
+  .toolbar .save-note{
+    font-size:11px;
+    color:var(--muted);
+    margin-left:4px;
+  }
+
+  .month-bar .goal-field{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    margin-left:6px;
+  }
+  .goal-field-label{
+    font-family:'Inter', sans-serif;
+    font-size:9.5px;
+    font-weight:600;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .goal-input-wrap{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    background:#fff;
+    border:1px solid var(--hair);
+    border-radius:8px;
+    padding:5px 9px;
+  }
+  .goal-input-wrap input{
+    width:34px;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'Poppins', sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+    -moz-appearance:textfield;
+  }
+  .goal-input-wrap input::-webkit-outer-spin-button,
+  .goal-input-wrap input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .goal-input-wrap .unit{
+    font-size:11px;
+    font-weight:600;
+    color:var(--muted);
+  }
+
+  .stats-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:14px 0 4px 28px;
+  }
+  .stat-chip{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    background:#F4F3EE;
+    border-radius:16px;
+    padding:6px 13px;
+  }
+  .stat-tag{
+    font-family:'Inter', sans-serif;
+    font-size:9.5px;
+    font-weight:600;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .stat-val{
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+  }
+
+  /* ---------- Section labels ---------- */
+  .section-labels{
+    display:grid;
+    grid-template-columns: 112px repeat(20, minmax(24px, 1fr)) 210px;
+    margin:30px 0 10px;
+    padding:0 4px;
+  }
+  .section-labels .lbl{
+    font-family:'Poppins', sans-serif;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:1.6px;
+    color:var(--ink);
+    text-transform:uppercase;
+  }
+  .section-labels .lbl.time{ grid-column: 2 / span 20; }
+  .section-labels .lbl.topic{ padding-left:14px; }
+
+  /* ---------- Grid wrapper ---------- */
+  .grid-wrapper{
+    overflow-x:auto;
+    border-top:1px solid var(--hair);
+  }
+  .grid{
+    min-width:840px;
+  }
+  .row{
+    display:grid;
+    grid-template-columns: 112px repeat(20, minmax(24px, 1fr)) 210px;
+    align-items:center;
+    min-height:38px;
+    border-bottom:1px solid var(--hair);
+    border-left:4px solid transparent;
+  }
+  /* Functional status colors, derived automatically from that day's logged hours. */
+  .row[data-status="red"]{ border-left-color:#E8AFA2; }
+  .row[data-status="orange"]{ border-left-color:#EFB876; }
+  .row[data-status="yellow"]{ border-left-color:#E6CB6E; }
+  .row[data-status="green"]{ border-left-color:#9DB98A; }
+  .row.weekend{ background:var(--weekend-tint); }
+  .row.today{ box-shadow: inset 3px 0 0 var(--ink); }
+  .time-cells{ display:contents; }
+
+  .date-cell{
+    position:sticky;
+    left:0;
+    background:inherit;
+    background-color:var(--paper);
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:4px 8px;
+  }
+  .row.weekend .date-cell{ background-color:var(--weekend-tint); }
+  .row.weekend .date-cell .wd{ color:#4C6B3A; font-weight:700; }
+  .date-cell .dn{
+    font-family:'Poppins', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+    width:22px;
+    text-align:center;
+  }
+  .row.today .date-cell .dn{
+    background:var(--ink);
+    color:#fff;
+    border-radius:50%;
+    width:22px;height:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+  }
+  .date-cell .wd-total{
+    display:flex;
+    flex-direction:column;
+    line-height:1.25;
+  }
+  .date-cell .wd{
+    font-size:9.5px;
+    font-weight:600;
+    letter-spacing:1px;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .date-cell .day-total{
+    font-size:10px;
+    color:var(--muted);
+    font-variant-numeric:tabular-nums;
+    min-height:12px;
+  }
+  .date-cell .day-total.goal-hit{
+    font-weight:700;
+    color:var(--ink);
+  }
+
+  .cell{
+    all:unset;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:26px;
+    font-family:'Inter', sans-serif;
+    font-size:11.5px;
+    color:var(--muted);
+    cursor:pointer;
+    transition:background .1s ease;
+  }
+  .cell.hour{ font-weight:700; color:var(--ink); font-size:12px; }
+  .cell:hover{ background:#F2F1EA; border-radius:5px; }
+  .cell:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; border-radius:5px; }
+  .cell.filled{ font-weight:600; }
+  .cell.filled.start{ border-top-left-radius:6px; border-bottom-left-radius:6px; }
+  .cell.filled.end{ border-top-right-radius:6px; border-bottom-right-radius:6px; }
+
+  .topic-input{
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'Caveat', cursive;
+    font-size:19px;
+    font-weight:600;
+    padding:4px 10px 4px 14px;
+    width:100%;
+  }
+  .topic-input::placeholder{
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    font-weight:400;
+    color:#C9C7BC;
+    font-style:italic;
+  }
+
+  /* ---------- Monthly total (prominent, top of page) ---------- */
+  .monthly-total-card{
+    margin-top:22px;
+    padding:20px 24px;
+    background:#F4F3EE;
+    border:1px solid var(--hair);
+    border-radius:14px;
+  }
+  .mtc-label{
+    font-family:'Poppins', sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.8px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .mtc-value{
+    font-family:'Poppins', sans-serif;
+    font-size:34px;
+    font-weight:700;
+    color:var(--ink);
+    margin-top:4px;
+  }
+  .mtc-goal{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .mtc-goal.met{ color:#3F5A34; font-weight:700; }
+
+  .status-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--hair);
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-weight:600;
+    color:var(--muted);
+  }
+  .legend-dot{
+    width:10px; height:10px;
+    border-radius:50%;
+    display:inline-block;
+  }
+  .legend-dot.status-red{ background:#E8AFA2; }
+  .legend-dot.status-orange{ background:#EFB876; }
+  .legend-dot.status-yellow{ background:#E6CB6E; }
+  .legend-dot.status-green{ background:#9DB98A; }
+
+  .no-print{}
+
+  /* ---------- Print ---------- */
+  @media print{
+    @page{ size: landscape; margin:10mm; }
+    .tracker-shell{ background:#fff; padding:0; }
+    .site-header, .site-footer{ display:none !important; }
+    .page{ box-shadow:none; padding:0; max-width:none; }
+    .no-print{ display:none !important; }
+    .date-cell{ position:static; }
+    .grid-wrapper{ overflow-x:visible; }
+    .grid{ min-width:0; }
+    .cell, .cell.filled, .row.weekend, .row[data-status]{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .row{ break-inside:avoid; }
+  }
+
+  @media (max-width: 700px){
+    .tracker-shell{ padding:16px 8px; }
+    .page{ padding:22px 14px 20px; }
+    h1{ font-size:19px; letter-spacing:2px; }
+    .title-row .dot{ width:13px; height:13px; }
+    .subtitle{ margin-left:0; font-size:12px; }
+
+    .month-bar{ flex-wrap:wrap; margin-left:0; row-gap:10px; }
+    .month-label{ min-width:0; font-size:14px; }
+    .month-bar .goal-field{ margin-left:0; }
+    .toolbar{ margin-left:0; }
+    .stats-row{ margin-left:0; }
+
+    .monthly-total-card{ padding:16px 18px; margin-top:18px; }
+    .mtc-value{ font-size:28px; }
+    .status-legend{ gap:10px 14px; }
+    .section-labels{ display:none; }
+
+    .grid-wrapper{ overflow-x:visible; border-top:none; width:100%; }
+    .grid{ min-width:0; width:100%; display:flex; flex-direction:column; gap:10px; }
+
+    .row{
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:10px;
+      min-height:0;
+      width:100%;
+      background:#fff;
+      border-top:1px solid var(--hair);
+      border-right:1px solid var(--hair);
+      border-bottom:1px solid var(--hair);
+      border-left:4px solid var(--hair);
+      border-radius:12px;
+      padding:12px 12px 14px;
+    }
+    .row.weekend{ background:var(--weekend-tint); border-color:rgba(76,107,58,0.25); }
+    .row.today{
+      box-shadow:none;
+      border-top:1.5px solid var(--ink);
+      border-right:1.5px solid var(--ink);
+      border-bottom:1.5px solid var(--ink);
+    }
+
+    .date-cell{
+      position:static;
+      background:transparent;
+      padding:0;
+      gap:10px;
+    }
+    .date-cell .dn{ font-size:18px; width:auto; }
+    .row.today .date-cell .dn{ width:26px; height:26px; font-size:14px; }
+    .wd-total{ flex-direction:row; align-items:baseline; gap:8px; }
+    .date-cell .wd{ font-size:11px; }
+    .date-cell .day-total{ font-size:11.5px; }
+
+    .time-cells{
+      display:flex !important;
+      flex-wrap:wrap;
+      gap:7px;
+      width:100%;
+    }
+    /* Keep only half-hour marks on mobile (30, 1h, 1h30, 2h ...) — drop :15 / :45 */
+    .time-cells .cell:nth-child(odd){ display:none; }
+    .cell{
+      flex:0 0 auto;
+      min-width:48px;
+      height:38px;
+      padding:0 6px;
+      border:1px solid var(--hair);
+      border-radius:9px;
+      font-size:13px;
+    }
+    .cell.hour{ border-color:#D9D6C9; }
+    .cell.filled,
+    .cell.filled.start,
+    .cell.filled.end{ border-color:transparent; border-radius:9px; }
+    .cell:hover{ background:inherit; border-radius:9px; }
+
+    .topic-input{
+      border:1px solid var(--hair);
+      border-radius:9px;
+      background:#fff;
+      padding:9px 12px;
+      font-size:18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="site-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-3 0-5.5 2.2-5.5 5.2 0 1.7.8 2.8 1.7 3.7.7.7 1.1 1.4 1.1 2.3v1.3h5.4v-1.3c0-.9.4-1.6 1.1-2.3.9-.9 1.7-2 1.7-3.7C17.5 6.2 15 4 12 4Z"/><path d="M9.7 19.5h4.6M10.3 21.5h3.4"/></svg>
+    Study Time Tracker
+  </a>
+  <nav class="site-nav">
+    <a href="index.html">Home</a>
+    <a href="study-time-tracker.html" class="active">Study Time Tracker</a>
+    <!-- Additional pages can be added here later — this nav is a plain flex row. -->
+  </nav>
+</header>
+
+<main class="tracker-shell">
+<div class="page">
+
+  <div class="title-row">
+    <span class="dot"></span>
+    <h1>Study Time Tracker</h1>
+  </div>
+  <p class="subtitle">Tap a time to log how long you studied each day, then note what you worked on.</p>
+
+  <div class="monthly-total-card">
+    <div class="mtc-label">Total Time Studied This Month</div>
+    <div class="mtc-value" id="monthlyTotalValue">0m</div>
+    <div class="mtc-goal" id="monthlyTotalGoal"></div>
+    <div class="status-legend">
+      <span class="legend-item"><span class="legend-dot status-red"></span>No study</span>
+      <span class="legend-item"><span class="legend-dot status-orange"></span>1–2h</span>
+      <span class="legend-item"><span class="legend-dot status-yellow"></span>3–4h</span>
+      <span class="legend-item"><span class="legend-dot status-green"></span>5h+</span>
+    </div>
+  </div>
+
+  <div class="month-bar no-print">
+    <button class="nav-btn" id="prevBtn" aria-label="Previous month">&#8249;</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="nav-btn" id="nextBtn" aria-label="Next month">&#8250;</button>
+
+    <label class="goal-field">
+      <span class="goal-field-label">Daily goal</span>
+      <span class="goal-input-wrap">
+        <input type="number" id="dailyGoalInput" min="0" step="0.25" placeholder="0">
+        <span class="unit">h</span>
+      </span>
+    </label>
+    <label class="goal-field">
+      <span class="goal-field-label">Monthly goal</span>
+      <span class="goal-input-wrap">
+        <input type="number" id="monthlyGoalInput" min="0" step="1" placeholder="0">
+        <span class="unit">h</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="stats-row no-print" id="statsRow">
+    <span class="stat-chip"><span class="stat-tag">Best day</span><span class="stat-val" id="bestDayStat">—</span></span>
+    <span class="stat-chip"><span class="stat-tag">Best month</span><span class="stat-val" id="bestMonthStat">—</span></span>
+  </div>
+
+  <div class="toolbar no-print">
+    <button id="clearBtn">Clear month</button>
+    <button id="printBtn" class="primary">Print / Save PDF</button>
+    <span class="save-note" id="saveNote"></span>
+  </div>
+
+  <div class="section-labels">
+    <div class="lbl">Date</div>
+    <div class="lbl time">Time spent</div>
+    <div class="lbl topic">Topic</div>
+  </div>
+
+  <div class="grid-wrapper">
+    <div class="grid" id="grid"></div>
+  </div>
+
+</div>
+</main>
+
+<footer class="site-footer">© Study Time Tracker</footer>
+
+<script>
+(function(){
+  const TIME_SLOTS = (() => {
+    const slots = [];
+    for (let h = 1; h <= 5; h++){
+      slots.push({label:'15', minutes:(h-1)*60+15});
+      slots.push({label:'30', minutes:(h-1)*60+30});
+      slots.push({label:'45', minutes:(h-1)*60+45});
+      slots.push({label:h+'h', minutes:h*60, hour:true});
+    }
+    return slots;
+  })();
+
+  // Functional status colors — derived automatically from a day's total logged
+  // hours (spec section 7). Not decorative, not user-selectable.
+  // Thresholds: 0h -> red, 1-2h -> orange, 3-4h -> yellow, 5h+ -> green.
+  // ASSUMPTION: the spec's given thresholds leave gaps for fractional hours
+  // between named bands (e.g. 2.5h matches neither the 1-2 nor 3-4 branch),
+  // even though decimal support is explicitly required. Resolved here as
+  // continuous bands so every non-negative value gets a state:
+  //   0 -> red, (0,3) -> orange, [3,5) -> yellow, [5,∞) -> green.
+  const STATUS_COLORS = {
+    red:    { bg:'#F3C4BB', text:'#9A3B2B', label:'No study logged' },
+    orange: { bg:'#F6D3A8', text:'#9A5B1E', label:'Light study day' },
+    yellow: { bg:'#F0DE9A', text:'#8A6A1E', label:'Moderate study day' },
+    green:  { bg:'#B7CBA6', text:'#4C6B3A', label:'Strong study day' }
+  };
+
+  function dayStatus(hours){
+    if(!(hours > 0)) return 'red';   // 0 hours, or any invalid/negative value
+    if(hours < 3) return 'orange';   // covers the 1-2h band plus in-between decimals
+    if(hours < 5) return 'yellow';   // covers the 3-4h band plus in-between decimals
+    return 'green';                  // 5h and up
+  }
+  const WEEKDAY_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const now = new Date();
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth(); // 0-indexed
+  const todayY = now.getFullYear(), todayM = now.getMonth(), todayD = now.getDate();
+
+  let rows = []; // {day, weekday, filled, topic}
+  let dailyGoal = 0;   // hours
+  let monthlyGoal = 0; // hours
+
+  const grid = document.getElementById('grid');
+  const monthlyTotalValue = document.getElementById('monthlyTotalValue');
+  const monthlyTotalGoal = document.getElementById('monthlyTotalGoal');
+  const monthLabel = document.getElementById('monthLabel');
+  const saveNote = document.getElementById('saveNote');
+  const dailyGoalInput = document.getElementById('dailyGoalInput');
+  const monthlyGoalInput = document.getElementById('monthlyGoalInput');
+  const bestDayStat = document.getElementById('bestDayStat');
+  const bestMonthStat = document.getElementById('bestMonthStat');
+
+  function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+
+  function generateRows(y,m){
+    const n = daysInMonth(y,m);
+    const out = [];
+    for(let d=1; d<=n; d++){
+      out.push({ day:d, weekday: new Date(y,m,d).getDay(), filled:0, topic:'' });
+    }
+    return out;
+  }
+
+  function minutesToLabel(m){
+    if(!m) return '0m';
+    const h = Math.floor(m/60), mm = m%60;
+    if(h===0) return mm+'m';
+    if(mm===0) return h+'h';
+    return h+'h '+mm+'m';
+  }
+
+  function formatHours(h){
+    return (h % 1 === 0) ? h + 'h' : parseFloat(h.toFixed(2)) + 'h';
+  }
+
+  function monthTotalMinutes(rowsArr){
+    return rowsArr.reduce((sum,r)=> sum + (r.filled>0 ? TIME_SLOTS[r.filled-1].minutes : 0), 0);
+  }
+
+  function storageKey(y,m){
+    return 'study-tracker-' + y + '-' + String(m+1).padStart(2,'0');
+  }
+
+  function cellHTML(rowIndex, slotIndex, slot, filled, status){
+    const isFilled = slotIndex < filled;
+    const isStart = isFilled && slotIndex === 0;
+    const isEnd = isFilled && slotIndex === filled - 1;
+    const pal = STATUS_COLORS[status];
+    const classes = ['cell'];
+    if(slot.hour) classes.push('hour');
+    if(isFilled) classes.push('filled');
+    if(isStart) classes.push('start');
+    if(isEnd) classes.push('end');
+    const style = isFilled ? `style="background:${pal.bg};color:${pal.text};"` : '';
+    return `<button type="button" class="${classes.join(' ')}" data-row="${rowIndex}" data-slot="${slotIndex}" ${style} aria-pressed="${isFilled}">${slot.label}</button>`;
+  }
+
+  function rowHTML(row, index){
+    const isWeekend = row.weekday === 5 || row.weekday === 6; // Friday & Saturday
+    const isToday = viewYear===todayY && viewMonth===todayM && row.day===todayD;
+    const totalMinutes = row.filled > 0 ? TIME_SLOTS[row.filled-1].minutes : 0;
+    const status = dayStatus(totalMinutes / 60);
+    const goalHit = dailyGoal > 0 && totalMinutes >= dailyGoal * 60;
+    const cells = TIME_SLOTS.map((slot,i)=>cellHTML(index, i, slot, row.filled, status)).join('');
+    const rowClasses = ['row'];
+    if(isWeekend) rowClasses.push('weekend');
+    if(isToday) rowClasses.push('today');
+    const totalText = row.filled>0 ? minutesToLabel(totalMinutes) + (goalHit ? ' \u2713' : '') : '';
+    return `<div class="${rowClasses.join(' ')}" data-row="${index}" data-status="${status}" title="${STATUS_COLORS[status].label}">
+      <div class="date-cell">
+        <span class="dn">${row.day}</span>
+        <span class="wd-total">
+          <span class="wd">${WEEKDAY_SHORT[row.weekday]}</span>
+          <span class="day-total${goalHit ? ' goal-hit' : ''}" data-row="${index}">${totalText}</span>
+        </span>
+      </div>
+      <div class="time-cells">${cells}</div>
+      <input type="text" class="topic-input" data-row="${index}" placeholder="What did you study?" value="${escapeAttr(row.topic)}" aria-label="Topic for day ${row.day}">
+    </div>`;
+  }
+
+  function escapeAttr(str){
+    return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  function buildGrid(){
+    monthLabel.textContent = MONTH_NAMES[viewMonth] + ' ' + viewYear;
+    grid.innerHTML = rows.map(rowHTML).join('');
+    updateMonthlyTotal();
+  }
+
+  function renderRow(r){
+    const row = rows[r];
+    const totalMinutes = row.filled > 0 ? TIME_SLOTS[row.filled-1].minutes : 0;
+    const status = dayStatus(totalMinutes / 60);
+    const pal = STATUS_COLORS[status];
+    const rowEl = grid.querySelector(`.row[data-row="${r}"]`);
+    rowEl.dataset.status = status;
+    rowEl.title = pal.label;
+    const cells = grid.querySelectorAll(`.cell[data-row="${r}"]`);
+    cells.forEach((cell,i)=>{
+      const isFilled = i < row.filled;
+      const isStart = isFilled && i === 0;
+      const isEnd = isFilled && i === row.filled - 1;
+      cell.classList.toggle('filled', isFilled);
+      cell.classList.toggle('start', isStart);
+      cell.classList.toggle('end', isEnd);
+      cell.setAttribute('aria-pressed', isFilled);
+      if(isFilled){
+        cell.style.background = pal.bg;
+        cell.style.color = pal.text;
+      } else {
+        cell.style.background = '';
+        cell.style.color = '';
+      }
+    });
+    const goalHit = dailyGoal > 0 && totalMinutes >= dailyGoal * 60;
+    const totalEl = grid.querySelector(`.day-total[data-row="${r}"]`);
+    totalEl.textContent = row.filled > 0 ? minutesToLabel(totalMinutes) + (goalHit ? ' \u2713' : '') : '';
+    totalEl.classList.toggle('goal-hit', goalHit);
+  }
+
+  function updateMonthlyTotal(){
+    const total = monthTotalMinutes(rows);
+    monthlyTotalValue.textContent = minutesToLabel(total);
+    if(monthlyGoal > 0){
+      const totalHours = total / 60;
+      const pct = Math.round((totalHours / monthlyGoal) * 100);
+      monthlyTotalGoal.textContent = `of ${formatHours(monthlyGoal)} goal · ${pct}%`;
+      monthlyTotalGoal.classList.toggle('met', totalHours >= monthlyGoal);
+    } else {
+      monthlyTotalGoal.textContent = '';
+      monthlyTotalGoal.classList.remove('met');
+    }
+    updateStats();
+  }
+
+  function updateStats(){
+    // Best single day within the month currently on screen.
+    let bestDay = null, bestDayMinutes = 0;
+    rows.forEach(row=>{
+      const m = row.filled > 0 ? TIME_SLOTS[row.filled-1].minutes : 0;
+      if(m > bestDayMinutes){ bestDayMinutes = m; bestDay = row; }
+    });
+    bestDayStat.textContent = bestDay
+      ? `${WEEKDAY_SHORT[bestDay.weekday]} ${bestDay.day} — ${minutesToLabel(bestDayMinutes)}`
+      : '—';
+
+    // Best month across every month ever saved, including the one on screen right now.
+    const currentKey = storageKey(viewYear, viewMonth);
+    let bestMonthKey = currentKey, bestMonthMinutes = monthTotalMinutes(rows);
+    try{
+      for(let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        const match = key && key.match(/^study-tracker-(\d{4})-(\d{2})$/);
+        if(!match || key === currentKey) continue;
+        const savedRows = JSON.parse(localStorage.getItem(key));
+        if(!Array.isArray(savedRows)) continue;
+        const total = monthTotalMinutes(savedRows);
+        if(total > bestMonthMinutes){ bestMonthMinutes = total; bestMonthKey = key; }
+      }
+    }catch(err){
+      console.error('Stats scan failed', err);
+    }
+
+    if(bestMonthMinutes > 0){
+      const match = bestMonthKey.match(/^study-tracker-(\d{4})-(\d{2})$/);
+      const y = Number(match[1]), mo = Number(match[2]) - 1;
+      bestMonthStat.textContent = `${MONTH_NAMES[mo]} ${y} — ${minutesToLabel(bestMonthMinutes)}`;
+    } else {
+      bestMonthStat.textContent = '—';
+    }
+  }
+
+  grid.addEventListener('click', (e)=>{
+    const cell = e.target.closest('.cell');
+    if(!cell) return;
+    const r = +cell.dataset.row;
+    const s = +cell.dataset.slot;
+    rows[r].filled = (rows[r].filled === s+1) ? 0 : s+1;
+    renderRow(r);
+    updateMonthlyTotal();
+    scheduleSave();
+  });
+
+  grid.addEventListener('input', (e)=>{
+    if(!e.target.classList.contains('topic-input')) return;
+    const r = +e.target.dataset.row;
+    rows[r].topic = e.target.value;
+    scheduleSave();
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', ()=>{
+    rows = rows.map(r => ({ day:r.day, weekday:r.weekday, filled:0, topic:'' }));
+    buildGrid();
+    clearTimeout(saveTimer);
+    saveData(viewYear, viewMonth, rows);
+  });
+
+  document.getElementById('printBtn').addEventListener('click', ()=>{
+    if(window.self !== window.top){
+      // Embedded in a preview iframe — those commonly block window.print().
+      // Open the page in its own tab instead, where printing isn't restricted.
+      const printWindow = window.open('', '_blank');
+      if(printWindow){
+        printWindow.document.write(document.documentElement.outerHTML);
+        printWindow.document.close();
+        printWindow.addEventListener('load', ()=>{ printWindow.focus(); printWindow.print(); });
+      } else {
+        alert('Please allow pop-ups for this page, then click Print again — or open this file directly in your browser and press Ctrl/Cmd+P.');
+      }
+    } else {
+      window.print();
+    }
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    let m = viewMonth - 1, y = viewYear;
+    if(m < 0){ m = 11; y -= 1; }
+    goToMonth(y, m);
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    let m = viewMonth + 1, y = viewYear;
+    if(m > 11){ m = 0; y += 1; }
+    goToMonth(y, m);
+  });
+
+  function goToMonth(y, m){
+    // Flush any pending edit for the month we're leaving BEFORE switching,
+    // so a quick month-change right after editing never loses data.
+    clearTimeout(saveTimer);
+    saveData(viewYear, viewMonth, rows);
+
+    viewYear = y;
+    viewMonth = m;
+    rows = loadSavedRows(viewYear, viewMonth) || generateRows(viewYear, viewMonth);
+    buildGrid();
+  }
+
+  // ---------- Persistence (browser localStorage — works on any static host) ----------
+  let saveTimer = null;
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveNote.textContent = '';
+    const y = viewYear, m = viewMonth;
+    saveTimer = setTimeout(()=> saveData(y, m, rows), 500);
+  }
+
+  function saveData(y, m, dataRows){
+    try{
+      localStorage.setItem(storageKey(y, m), JSON.stringify(dataRows));
+      saveNote.textContent = 'Saved';
+      clearTimeout(saveData._noteTimer);
+      saveData._noteTimer = setTimeout(()=>{ saveNote.textContent=''; }, 1500);
+    }catch(err){
+      console.error('Save failed', err);
+      saveNote.textContent = 'Could not save';
+    }
+  }
+
+  // Best-effort save if the tab closes while an edit is still pending.
+  window.addEventListener('beforeunload', ()=>{
+    if(saveTimer){
+      clearTimeout(saveTimer);
+      saveData(viewYear, viewMonth, rows);
+    }
+  });
+
+  function loadSavedRows(y, m){
+    try{
+      const raw = localStorage.getItem(storageKey(y, m));
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    }catch(err){
+      console.error('Load failed', err);
+    }
+    return null;
+  }
+
+  // ---------- Goals ----------
+  const GOALS_KEY = 'study-tracker-goals';
+
+  function loadGoals(){
+    try{
+      const raw = localStorage.getItem(GOALS_KEY);
+      if(raw){
+        const g = JSON.parse(raw);
+        dailyGoal = Number(g.daily) || 0;
+        monthlyGoal = Number(g.monthly) || 0;
+      }
+    }catch(err){
+      console.error('Load goals failed', err);
+    }
+    dailyGoalInput.value = dailyGoal || '';
+    monthlyGoalInput.value = monthlyGoal || '';
+  }
+
+  function saveGoals(){
+    try{
+      localStorage.setItem(GOALS_KEY, JSON.stringify({ daily: dailyGoal, monthly: monthlyGoal }));
+    }catch(err){
+      console.error('Save goals failed', err);
+    }
+  }
+
+  dailyGoalInput.addEventListener('change', ()=>{
+    dailyGoal = parseFloat(dailyGoalInput.value) || 0;
+    saveGoals();
+    buildGrid();
+  });
+
+  monthlyGoalInput.addEventListener('change', ()=>{
+    monthlyGoal = parseFloat(monthlyGoalInput.value) || 0;
+    saveGoals();
+    updateMonthlyTotal();
+  });
+
+  // Load goals first so the initial render already reflects them, then load this month's data.
+  loadGoals();
+  rows = loadSavedRows(viewYear, viewMonth) || generateRows(viewYear, viewMonth);
+  buildGrid();
+})();
+</script>
+
+</body>
+</html>
