@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Study Time Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  html{ overflow-x:hidden; }
+
+  .dash-shell{
+    max-width:900px;
+    margin:0 auto;
+    padding:44px 24px 60px;
+  }
+
+  /* ---------- Gate / loading states ---------- */
+  .gate-message{
+    max-width:420px;
+    margin:80px auto;
+    text-align:center;
+    padding:36px 28px;
+    background:#F4F3EE;
+    border:1px solid var(--hair);
+    border-radius:16px;
+  }
+  .gate-message h2{
+    font-family:'Poppins', sans-serif;
+    font-size:18px;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .gate-message p{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:0 0 18px;
+  }
+
+  /* ---------- Welcome header ---------- */
+  .dash-welcome{
+    margin-bottom:36px;
+  }
+  .dash-welcome h1{
+    font-family:'Poppins', sans-serif;
+    font-size:26px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 6px;
+  }
+  .dash-welcome p{
+    font-size:14px;
+    color:var(--muted);
+    margin:0;
+  }
+
+  /* ---------- Section shell ---------- */
+  .dash-section{
+    background:#fff;
+    border:1px solid var(--hair);
+    border-radius:16px;
+    padding:26px 26px 24px;
+    margin-bottom:26px;
+  }
+  .dash-section h2{
+    font-family:'Poppins', sans-serif;
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 4px;
+  }
+  .dash-section .section-note{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:0 0 18px;
+  }
+
+  /* ---------- Calendar month nav ---------- */
+  .cal-month-bar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .cal-nav-btn{
+    width:28px; height:28px;
+    border-radius:50%;
+    border:1px solid var(--hair);
+    background:#fff;
+    cursor:pointer;
+    font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cal-nav-btn:hover{ background:#F2F1EA; }
+  .cal-month-label{
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    min-width:150px;
+  }
+
+  /* ---------- Calendar grid ---------- */
+  .cal-weekdays, .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+  }
+  .cal-weekdays{
+    margin-bottom:6px;
+  }
+  .cal-weekdays span{
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+  }
+  .cal-day{
+    all:unset;
+    box-sizing:border-box;
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:9px;
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    background:#F3C4BB;
+    color:#9A3B2B;
+    transition:transform .1s ease;
+  }
+  .cal-day:hover{ transform:scale(1.04); }
+  .cal-day:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .cal-day.marked{
+    background:#B7CBA6;
+    color:#4C6B3A;
+  }
+  .cal-day.empty{
+    background:transparent;
+    cursor:default;
+  }
+  .cal-day.empty:hover{ transform:none; }
+  .cal-day.today{ box-shadow:inset 0 0 0 2px var(--ink); }
+
+  .cal-legend{
+    display:flex;
+    gap:16px;
+    margin-top:16px;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .cal-legend span{ display:flex; align-items:center; gap:6px; }
+  .cal-legend .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .cal-legend .dot.red{ background:#F3C4BB; }
+  .cal-legend .dot.green{ background:#B7CBA6; }
+
+  /* ---------- Tracker link card ---------- */
+  .tracker-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .tracker-card-text p{
+    font-size:13.5px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:6px 0 0;
+    max-width:420px;
+  }
+  .tracker-card-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--forest);
+    color:#fff;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:12px 22px;
+    border-radius:24px;
+    text-decoration:none;
+    white-space:nowrap;
+    transition:background .15s ease;
+  }
+  .tracker-card-btn:hover{ background:#324A2A; }
+
+  @media (max-width:700px){
+    .dash-shell{ padding:28px 16px 40px; }
+    .dash-welcome h1{ font-size:21px; }
+    .dash-section{ padding:20px 18px 18px; }
+    .cal-day{ font-size:12px; border-radius:7px; }
+    .cal-weekdays span{ font-size:9.5px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="site-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-3 0-5.5 2.2-5.5 5.2 0 1.7.8 2.8 1.7 3.7.7.7 1.1 1.4 1.1 2.3v1.3h5.4v-1.3c0-.9.4-1.6 1.1-2.3.9-.9 1.7-2 1.7-3.7C17.5 6.2 15 4 12 4Z"/><path d="M9.7 19.5h4.6M10.3 21.5h3.4"/></svg>
+    Study Time Tracker
+  </a>
+  <nav class="site-nav">
+    <a href="index.html">Home</a>
+    <a href="study-time-tracker.html">Study Time Tracker</a>
+    <a href="dashboard.html" id="navDashboardLink" class="active">Dashboard</a>
+    <!-- Additional pages can be added here later — this nav is a plain flex row. -->
+    <button class="nav-signin-btn" id="navSignIn">
+      <svg viewBox="0 0 18 18" width="14" height="14"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.85.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="nav-user-chip" id="navUserChip">
+      <img id="navUserAvatar" alt="">
+      <span class="nav-user-name" id="navUserName"></span>
+      <button class="nav-signout-btn" id="navSignOut">Sign out</button>
+    </div>
+  </nav>
+</header>
+
+<main class="dash-shell" id="dashShell">
+  <!-- Populated by JS below: either a sign-in prompt, or the dashboard itself. -->
+  <div class="gate-message" id="gateMessage">
+    <h2>Checking your sign-in status…</h2>
+    <p>One moment.</p>
+  </div>
+</main>
+
+<footer class="site-footer">© Study Time Tracker</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>
+(function(){
+  const dashShell = document.getElementById('dashShell');
+  const gateMessage = document.getElementById('gateMessage');
+
+  const WEEKDAY_LETTERS = ['S','M','T','W','T','F','S'];
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const today = new Date();
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+  let marksByDate = {}; // 'YYYY-MM-DD' -> true/false, for the currently viewed month
+
+  function pad(n){ return String(n).padStart(2, '0'); }
+  function dateStr(y, m, d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+  function daysInMonth(y, m){ return new Date(y, m+1, 0).getDate(); }
+
+  function showGate(title, note, showSignIn){
+    gateMessage.innerHTML = `
+      <h2>${title}</h2>
+      <p>${note}</p>
+      ${showSignIn ? '<button class="nav-signin-btn" id="gateSignIn" style="margin:0 auto;">Sign in with Google</button>' : ''}
+    `;
+    gateMessage.style.display = '';
+    if(showSignIn){
+      document.getElementById('gateSignIn').addEventListener('click', () => window.STTAuth.signInWithGoogle());
+    }
+  }
+
+  function renderDashboard(session){
+    const user = session.user;
+    const meta = user.user_metadata || {};
+    const name = (meta.full_name || meta.name || user.email || 'there').split(' ')[0];
+
+    dashShell.innerHTML = `
+      <div class="dash-welcome">
+        <h1>Welcome back, ${name}</h1>
+        <p>Here's your study activity.</p>
+      </div>
+
+      <section class="dash-section">
+        <h2>Daily Study Calendar</h2>
+        <p class="section-note">Tap a day to mark it green once you've studied. Any day you haven't marked yet stays red — this is a simple yes/no check-in, separate from your detailed hour tracking below.</p>
+        <div class="cal-month-bar">
+          <button class="cal-nav-btn" id="calPrev" aria-label="Previous month">‹</button>
+          <span class="cal-month-label" id="calMonthLabel"></span>
+          <button class="cal-nav-btn" id="calNext" aria-label="Next month">›</button>
+        </div>
+        <div class="cal-weekdays">${WEEKDAY_LETTERS.map(w=>`<span>${w}</span>`).join('')}</div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend">
+          <span><span class="dot green"></span>Marked</span>
+          <span><span class="dot red"></span>Not marked yet</span>
+        </div>
+      </section>
+
+      <section class="dash-section">
+        <div class="tracker-card">
+          <div class="tracker-card-text">
+            <h2>Study Time Tracker</h2>
+            <p>Log exactly how long you studied each day, set goals, and see your monthly total.</p>
+          </div>
+          <a class="tracker-card-btn" href="study-time-tracker.html">Open Study Time Tracker →</a>
+        </div>
+      </section>
+    `;
+
+    const calGrid = document.getElementById('calGrid');
+    const calMonthLabel = document.getElementById('calMonthLabel');
+
+    async function loadMonth(){
+      calGrid.innerHTML = '<p style="grid-column:1/-1;color:var(--muted);font-size:13px;">Loading…</p>';
+      calMonthLabel.textContent = MONTH_NAMES[viewMonth] + ' ' + viewYear;
+
+      marksByDate = {};
+      if(window.STTAuth.client){
+        const first = dateStr(viewYear, viewMonth, 1);
+        const last = dateStr(viewYear, viewMonth, daysInMonth(viewYear, viewMonth));
+        const { data, error } = await window.STTAuth.client
+          .from('calendar_marks')
+          .select('mark_date, marked')
+          .eq('user_id', user.id)
+          .gte('mark_date', first)
+          .lte('mark_date', last);
+        if(error){
+          console.error('Failed to load calendar marks', error);
+        } else {
+          (data || []).forEach(row => { marksByDate[row.mark_date] = row.marked; });
+        }
+      }
+      renderGrid();
+    }
+
+    function renderGrid(){
+      const firstWeekday = new Date(viewYear, viewMonth, 1).getDay();
+      const numDays = daysInMonth(viewYear, viewMonth);
+      let html = '';
+      for(let i=0; i<firstWeekday; i++) html += '<span class="cal-day empty"></span>';
+      for(let d=1; d<=numDays; d++){
+        const ds = dateStr(viewYear, viewMonth, d);
+        const marked = !!marksByDate[ds];
+        const isToday = viewYear===today.getFullYear() && viewMonth===today.getMonth() && d===today.getDate();
+        html += `<button type="button" class="cal-day${marked?' marked':''}${isToday?' today':''}" data-date="${ds}">${d}</button>`;
+      }
+      calGrid.innerHTML = html;
+    }
+
+    calGrid.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.cal-day:not(.empty)');
+      if(!btn) return;
+      const ds = btn.dataset.date;
+      const newState = !marksByDate[ds];
+      marksByDate[ds] = newState;
+      btn.classList.toggle('marked', newState);
+
+      if(window.STTAuth.client){
+        const { error } = await window.STTAuth.client
+          .from('calendar_marks')
+          .upsert({ user_id: user.id, mark_date: ds, marked: newState }, { onConflict: 'user_id,mark_date' });
+        if(error){
+          console.error('Failed to save calendar mark', error);
+          // Revert on failure so the UI never claims a save that didn't happen.
+          marksByDate[ds] = !newState;
+          btn.classList.toggle('marked', !newState);
+        }
+      }
+    });
+
+    document.getElementById('calPrev').addEventListener('click', () => {
+      viewMonth -= 1;
+      if(viewMonth < 0){ viewMonth = 11; viewYear -= 1; }
+      loadMonth();
+    });
+    document.getElementById('calNext').addEventListener('click', () => {
+      viewMonth += 1;
+      if(viewMonth > 11){ viewMonth = 0; viewYear += 1; }
+      loadMonth();
+    });
+
+    loadMonth();
+  }
+
+  async function init(){
+    if(!window.STTAuth || !window.STTAuth.isConfigured){
+      showGate(
+        'Sign-in isn\'t set up yet',
+        'This Dashboard needs a Google sign-in provider configured before it can load your data. If you\'re the site owner, finish the Supabase setup steps, then this page will work.',
+        false
+      );
+      return;
+    }
+    const session = await window.STTAuth.getSession();
+    if(!session){
+      showGate(
+        'Sign in to see your Dashboard',
+        'Your Daily Study Calendar and progress are tied to your Google account.',
+        true
+      );
+      window.STTAuth.onAuthChange((s) => { if(s) location.reload(); });
+      return;
+    }
+    gateMessage.style.display = 'none';
+    renderDashboard(session);
+  }
+
+  init();
+})();
+</script>
+
+</body>
+</html>
