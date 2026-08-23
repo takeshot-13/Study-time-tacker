@@ -20,19 +20,26 @@ create table if not exists public.calendar_marks (
 -- way for one account to see another account's marks through this table.
 alter table public.calendar_marks enable row level security;
 
+-- Postgres has no "CREATE POLICY IF NOT EXISTS", so each policy is dropped
+-- first. This makes the whole script safe to run more than once, even if
+-- an earlier run got partway through.
+drop policy if exists "select_own_marks" on public.calendar_marks;
 create policy "select_own_marks"
   on public.calendar_marks for select
   using (auth.uid() = user_id);
 
+drop policy if exists "insert_own_marks" on public.calendar_marks;
 create policy "insert_own_marks"
   on public.calendar_marks for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "update_own_marks" on public.calendar_marks;
 create policy "update_own_marks"
   on public.calendar_marks for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+drop policy if exists "delete_own_marks" on public.calendar_marks;
 create policy "delete_own_marks"
   on public.calendar_marks for delete
   using (auth.uid() = user_id);
