@@ -8,8 +8,8 @@ window.STTAuth = (function () {
   // The anon key is a public client-side key by design — Row Level
   // Security (see supabase-schema.sql) is what actually protects data,
   // not secrecy of this key.
-  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_URL = 'https://ollkbekmtmjszdldhtor.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sbGtiZWttdG1qc3pkbGRodG9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MDY5NDUsImV4cCI6MjEwMjk4Mjk0NX0.xQ50Ja-fZya7zGurrdOF5CbCgxGXaboiGuR_YEsGFqk';
 
   const isConfigured = SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
 
