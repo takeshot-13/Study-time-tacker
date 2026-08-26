@@ -82,5 +82,35 @@ window.STTAuth = (function () {
     onAuthChange(render);
   }
 
-  return { client, isConfigured, signInWithGoogle, signOut, getSession, onAuthChange, mountNavAuth };
+  // Wires up the slide-out side drawer (Home / Dashboard / Study Time
+  // Tracker) shared by every page. Expects #menuToggle, #sidebarOverlay,
+  // #sideDrawer, #sideDrawerClose, and .side-drawer-nav a links to exist.
+  function mountSidebar() {
+    const toggle = document.getElementById('menuToggle');
+    const overlay = document.getElementById('sidebarOverlay');
+    const drawer = document.getElementById('sideDrawer');
+    const closeBtn = document.getElementById('sideDrawerClose');
+    if (!toggle || !overlay || !drawer) return;
+
+    function open() { overlay.classList.add('open'); drawer.classList.add('open'); }
+    function close() { overlay.classList.remove('open'); drawer.classList.remove('open'); }
+
+    toggle.addEventListener('click', open);
+    overlay.addEventListener('click', close);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+    // Highlight whichever link matches the current page. Matched loosely
+    // (by base filename, extension stripped) since Netlify serves these
+    // pages at both "/dashboard" and "/dashboard.html".
+    const path = location.pathname.toLowerCase();
+    drawer.querySelectorAll('.side-drawer-nav a').forEach((a) => {
+      const base = a.getAttribute('href').replace('.html', '').toLowerCase();
+      const isHome = base === 'index' && (path === '/' || path.endsWith('/index') || path.endsWith('/index.html'));
+      const isOtherMatch = base !== 'index' && path.includes(base);
+      if (isHome || isOtherMatch) a.classList.add('active');
+    });
+  }
+
+  return { client, isConfigured, signInWithGoogle, signOut, getSession, onAuthChange, mountNavAuth, mountSidebar };
 })();

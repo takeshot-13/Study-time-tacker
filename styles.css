@@ -33,6 +33,28 @@ body{
   top:0;
   z-index:50;
 }
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.menu-toggle-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  color:var(--ink);
+  padding:0;
+  transition:background .15s ease;
+}
+.menu-toggle-btn:hover{ background:#F2F1EA; }
+.menu-toggle-btn svg{ width:20px; height:20px; }
+
 .site-logo{
   display:flex;
   align-items:center;
@@ -52,21 +74,8 @@ body{
 .site-nav{
   display:flex;
   align-items:center;
-  gap:28px;
+  gap:14px;
 }
-.site-nav a{
-  font-family:'Inter', sans-serif;
-  font-size:13px;
-  font-weight:600;
-  color:var(--muted);
-  text-decoration:none;
-  letter-spacing:0.2px;
-  padding:6px 2px;
-  border-bottom:2px solid transparent;
-  transition:color .15s ease, border-color .15s ease;
-}
-.site-nav a:hover{ color:var(--ink); }
-.site-nav a.active{ color:var(--ink); border-bottom-color:var(--forest); }
 
 .nav-signin-btn{
   font-family:'Poppins', sans-serif;
@@ -119,6 +128,96 @@ body{
 }
 .nav-signout-btn:hover{ color:var(--ink); border-color:var(--ink); }
 
+/* ---------- Slide-out side drawer (Home / Dashboard / Study Time Tracker) ---------- */
+.sidebar-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20,20,18,0.4);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:90;
+}
+.sidebar-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.side-drawer{
+  position:fixed;
+  top:0; left:0; bottom:0;
+  width:270px;
+  background:var(--paper);
+  border-right:1px solid var(--hair);
+  transform:translateX(-100%);
+  transition:transform .25s ease;
+  z-index:100;
+  display:flex;
+  flex-direction:column;
+  box-shadow:6px 0 28px rgba(0,0,0,0.10);
+}
+.side-drawer.open{
+  transform:translateX(0);
+}
+
+.side-drawer-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--hair);
+}
+.side-drawer-title{
+  font-family:'Poppins', sans-serif;
+  font-weight:700;
+  font-size:12px;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.side-drawer-close{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+  color:var(--muted);
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .15s ease, color .15s ease;
+}
+.side-drawer-close:hover{ background:#F2F1EA; color:var(--ink); }
+
+.side-drawer-nav{
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+  gap:2px;
+}
+.side-drawer-nav a{
+  display:block;
+  padding:11px 12px;
+  border-radius:8px;
+  font-family:'Inter', sans-serif;
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink);
+  text-decoration:none;
+  transition:background .15s ease;
+}
+.side-drawer-nav a:hover{ background:#F2F1EA; }
+.side-drawer-nav a.active{
+  background:#EDEBE3;
+  color:var(--forest);
+}
+
+@media (max-width:700px){
+  .side-drawer{ width:80%; max-width:280px; }
+}
+
 /* ---------- Site footer ---------- */
 .site-footer{
   padding:26px 40px;
@@ -132,7 +231,6 @@ body{
 @media (max-width:700px){
   .site-header{ padding:14px 18px; }
   .site-nav{ gap:16px; }
-  .site-nav a{ font-size:12px; }
   .site-footer{ padding:20px 16px; }
   .nav-user-chip .nav-user-name{ display:none; }
   .nav-signin-btn{ padding:7px 12px; font-size:12px; }
