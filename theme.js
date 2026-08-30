@@ -1,40 +1,55 @@
 // Shared across Home, Study Time Tracker, and Dashboard.
 // Pairs with the tiny inline anti-flash script in each page's <head>,
-// which sets the data-theme attribute before first paint. This file only
-// wires up the toggle button and keeps it in sync with the current theme.
+// which resolves and applies the theme before first paint. This file
+// wires up the Light/Dark/System control and keeps "System" live-synced
+// to OS-level changes without needing a page reload.
 
 window.STTTheme = (function () {
-  const KEY = 'stt-theme';
+  const KEY = 'stt-theme-mode'; // 'light' | 'dark' | 'system'
+  const mql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
-  function getStored() {
-    try { return localStorage.getItem(KEY); } catch (e) { return null; }
+  function getMode() {
+    try { return localStorage.getItem(KEY) || 'system'; } catch (e) { return 'system'; }
   }
 
-  function current() {
-    return document.documentElement.getAttribute('data-theme') || 'light';
+  function resolve(mode) {
+    if (mode === 'system') return (mql && mql.matches) ? 'dark' : 'light';
+    return mode;
   }
 
-  function apply(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem(KEY, theme); } catch (e) { /* ignore */ }
-    updateToggleUI();
+  function applyResolved() {
+    document.documentElement.setAttribute('data-theme', resolve(getMode()));
+    updateUI();
   }
 
-  function toggle() {
-    apply(current() === 'dark' ? 'light' : 'dark');
+  function setMode(mode) {
+    try { localStorage.setItem(KEY, mode); } catch (e) { /* ignore */ }
+    applyResolved();
   }
 
-  function updateToggleUI() {
-    const label = document.getElementById('themeToggleLabel');
-    if (label) label.textContent = current() === 'dark' ? 'Dark mode' : 'Light mode';
+  function updateUI() {
+    const mode = getMode();
+    document.querySelectorAll('.theme-mode-btn').forEach((btn) => {
+      const isActive = btn.dataset.mode === mode;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
   }
 
   function mountToggle() {
-    const btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    btn.addEventListener('click', toggle);
-    updateToggleUI();
+    document.querySelectorAll('.theme-mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+    updateUI();
+
+    // If the person is on "System", keep the applied theme in sync with
+    // OS-level changes made while the page is already open.
+    if (mql) {
+      mql.addEventListener('change', () => {
+        if (getMode() === 'system') applyResolved();
+      });
+    }
   }
 
-  return { current, apply, toggle, mountToggle };
+  return { getMode, setMode, mountToggle };
 })();
