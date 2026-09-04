@@ -32,8 +32,33 @@
 
   /* ---------- Hero ---------- */
   .hero{
+    position:relative;
     text-align:center;
     margin-bottom:64px;
+    padding:20px 0;
+  }
+  .hero-shapes{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:visible;
+  }
+  .hero-shapes .shape{
+    position:absolute;
+    color:var(--accent);
+    opacity:0.32;
+  }
+  .hero-shapes .shape svg{ width:100%; height:100%; }
+  .shape.s-book{ top:2%; left:6%; width:34px; height:34px; }
+  .shape.s-pencil{ top:10%; right:8%; width:30px; height:30px; }
+  .shape.s-clock{ bottom:14%; left:11%; width:28px; height:28px; }
+  .shape.s-sparkle{ bottom:2%; right:15%; width:24px; height:24px; }
+  .shape.s-cap{ top:46%; left:1%; width:26px; height:26px; }
+
+  .hero > *{
+    position:relative;
+    z-index:1;
   }
   .hero-icon{
     color:var(--forest);
@@ -72,6 +97,120 @@
     transition:background .15s ease, transform .15s ease;
   }
   .cta-btn:hover{ background:#324A2A; transform:translateY(-1px); }
+
+  /* Entrance + floating motion — layered on top of an already-correct
+     static state, so prefers-reduced-motion users just see everything
+     settled in place with zero animation, never a stuck-mid-fade state. */
+  @media (prefers-reduced-motion: no-preference){
+    .hero-icon, .hero h1, .hero-sub, .cta-btn{
+      animation:heroFadeUp .6s ease both;
+    }
+    .hero-icon{ animation-delay:0s; }
+    .hero h1{ animation-delay:.08s; }
+    .hero-sub{ animation-delay:.16s; }
+    .cta-btn{ animation-delay:.26s; }
+
+    .shape.s-book{ animation:float-a 7.5s ease-in-out infinite; }
+    .shape.s-pencil{ animation:float-b 9s ease-in-out infinite; }
+    .shape.s-clock{ animation:float-c 8s ease-in-out infinite; }
+    .shape.s-sparkle{ animation:float-a 10.5s ease-in-out infinite; }
+    .shape.s-cap{ animation:float-b 6.5s ease-in-out infinite; }
+  }
+
+  @keyframes heroFadeUp{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes float-a{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-14px) rotate(6deg); }
+  }
+  @keyframes float-b{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(10px) rotate(-6deg); }
+  }
+  @keyframes float-c{
+    0%,100%{ transform:translate(0,0); }
+    50%{ transform:translate(6px,-10px); }
+  }
+
+  /* ---------- Dashboard preview ---------- */
+  .dashboard-preview{
+    display:flex;
+    align-items:center;
+    gap:48px;
+    margin:0 0 64px;
+    flex-wrap:wrap;
+  }
+  .preview-copy{ flex:1 1 260px; }
+  .preview-copy h2{
+    font-family:'Poppins', sans-serif;
+    font-size:23px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0 0 10px;
+  }
+  .preview-copy p{
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.65;
+    margin:0 0 16px;
+    max-width:380px;
+  }
+  .preview-link{
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--forest);
+    text-decoration:none;
+  }
+  .preview-link:hover{ text-decoration:underline; }
+
+  .preview-mockup{
+    flex:1 1 260px;
+    display:flex;
+    justify-content:center;
+  }
+  .mockup-card{
+    width:100%;
+    max-width:300px;
+    background:var(--surface);
+    border:1px solid var(--hair);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 20px 45px rgba(0,0,0,0.10);
+    transform:rotate(-2deg);
+  }
+  .mockup-header{ display:flex; gap:6px; margin-bottom:14px; }
+  .mockup-dot{ width:8px; height:8px; border-radius:50%; background:var(--hair); }
+  .mockup-title{
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink);
+    margin-bottom:12px;
+  }
+  .mockup-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+  }
+  .mockup-grid .dot{
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#F3C4BB;
+  }
+  .mockup-grid .dot.marked{ background:#B7CBA6; }
+  .mockup-grid .dot.empty{ background:transparent; }
+
+  @media (prefers-reduced-motion: no-preference){
+    .mockup-card{ animation:cardFloat 6s ease-in-out infinite; }
+  }
+  @keyframes cardFloat{
+    0%,100%{ transform:rotate(-2deg) translateY(0); }
+    50%{ transform:rotate(-2deg) translateY(-8px); }
+  }
 
   /* ---------- Feature cards ---------- */
   .features{
@@ -113,7 +252,11 @@
     .home-main{ padding:44px 18px 34px; }
     .hero h1{ font-size:32px; }
     .hero-sub{ font-size:14.5px; }
+    .hero-shapes{ display:none; }
     .features{ grid-template-columns:1fr; }
+    .dashboard-preview{ margin:0 0 44px; text-align:center; }
+    .preview-copy p{ margin-left:auto; margin-right:auto; }
+    .mockup-card{ max-width:260px; }
   }
 </style>
 </head>
@@ -175,12 +318,52 @@
 <main class="home-main">
 
   <section class="hero">
+    <div class="hero-shapes" aria-hidden="true">
+      <span class="shape s-book">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5c0-1 .8-1.5 2-1.5h6v15H6c-1.2 0-2 .5-2 1.5V5.5Z"/><path d="M20 5.5c0-1-.8-1.5-2-1.5h-6v15h6c1.2 0 2 .5 2 1.5V5.5Z"/></svg>
+      </span>
+      <span class="shape s-pencil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20.5 9.5 8 22H2v-6L14.5 3.5Z"/><path d="M12 6 18 12"/></svg>
+      </span>
+      <span class="shape s-clock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+      </span>
+      <span class="shape s-sparkle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>
+      </span>
+      <span class="shape s-cap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2 9l10 5 10-5-10-5Z"/><path d="M6 11.5V17c0 1.5 2.5 3 6 3s6-1.5 6-3v-5.5"/></svg>
+      </span>
+    </div>
     <div class="hero-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c-3 0-5.5 2.2-5.5 5.2 0 1.7.8 2.8 1.7 3.7.7.7 1.1 1.4 1.1 2.3v1.3h5.4v-1.3c0-.9.4-1.6 1.1-2.3.9-.9 1.7-2 1.7-3.7C17.5 6.2 15 4 12 4Z"/><path d="M9.7 19.5h4.6M10.3 21.5h3.4"/></svg>
     </div>
     <h1>Study With Intention</h1>
     <p class="hero-sub">A simple, calm space to plan your sessions, hit your goals, and watch your study habits grow — one day at a time.</p>
-    <a class="cta-btn" href="study-time-tracker.html">Study Time Tracker →</a>
+    <a class="cta-btn" href="study-time-tracker.html">Start Planning →</a>
+  </section>
+
+  <section class="dashboard-preview">
+    <div class="preview-copy">
+      <h2>See your progress at a glance</h2>
+      <p>Your Dashboard brings together a simple daily check-in calendar and your detailed study history, synced to your Google account.</p>
+      <a class="preview-link" href="dashboard.html">Open Dashboard →</a>
+    </div>
+    <div class="preview-mockup" aria-hidden="true">
+      <div class="mockup-card">
+        <div class="mockup-header">
+          <span class="mockup-dot"></span>
+          <span class="mockup-dot"></span>
+          <span class="mockup-dot"></span>
+        </div>
+        <div class="mockup-title">Calendar</div>
+        <div class="mockup-grid">
+          <span class="dot empty"></span><span class="dot empty"></span><span class="dot marked"></span><span class="dot"></span><span class="dot marked"></span><span class="dot marked"></span><span class="dot"></span>
+          <span class="dot marked"></span><span class="dot"></span><span class="dot marked"></span><span class="dot marked"></span><span class="dot"></span><span class="dot marked"></span><span class="dot marked"></span>
+          <span class="dot"></span><span class="dot marked"></span><span class="dot marked"></span><span class="dot"></span><span class="dot marked"></span><span class="dot marked"></span><span class="dot marked"></span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="features">
