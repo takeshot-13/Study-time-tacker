@@ -94,46 +94,55 @@
     margin:0 0 18px;
   }
 
+  /* ---------- Calendar card ---------- */
+  .calendar-card h2{
+    font-family:'Poppins', sans-serif;
+    font-size:24px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .calendar-card .section-note{
+    margin-bottom:22px;
+  }
+
   /* ---------- Calendar month nav ---------- */
   .cal-month-bar{
     display:flex;
     align-items:center;
-    gap:12px;
-    margin-bottom:16px;
+    justify-content:space-between;
+    margin-bottom:20px;
   }
   .cal-nav-btn{
-    width:28px; height:28px;
+    width:38px; height:38px;
     border-radius:50%;
-    border:1px solid var(--hair);
-    background:var(--surface);
+    border:none;
+    background:var(--active-bg);
+    color:var(--forest);
     cursor:pointer;
-    font-size:14px;
+    font-size:16px;
     display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, transform .1s ease;
   }
-  .cal-nav-btn:hover{ background:var(--hover-bg); }
+  .cal-nav-btn:hover{ background:var(--hover-bg); transform:scale(1.05); }
   .cal-month-label{
     font-family:'Poppins', sans-serif;
     font-weight:700;
-    font-size:14px;
-    letter-spacing:0.5px;
-    text-transform:uppercase;
-    min-width:150px;
+    font-size:17px;
+    color:var(--ink);
   }
 
   /* ---------- Calendar grid ---------- */
   .cal-weekdays, .cal-grid{
     display:grid;
     grid-template-columns:repeat(7, 1fr);
-    gap:6px;
+    gap:8px;
   }
   .cal-weekdays{
-    margin-bottom:6px;
+    margin-bottom:10px;
   }
   .cal-weekdays span{
-    font-size:10.5px;
-    font-weight:700;
-    letter-spacing:0.5px;
-    text-transform:uppercase;
+    font-size:12px;
+    font-weight:600;
     color:var(--muted);
     text-align:center;
   }
@@ -144,16 +153,17 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    border-radius:9px;
+    position:relative;
+    border-radius:50%;
     font-family:'Inter', sans-serif;
-    font-size:13px;
+    font-size:14px;
     font-weight:600;
     cursor:pointer;
     background:#F3C4BB;
     color:#9A3B2B;
     transition:transform .1s ease;
   }
-  .cal-day:hover{ transform:scale(1.04); }
+  .cal-day:hover{ transform:scale(1.06); }
   .cal-day:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   .cal-day.marked{
     background:#B7CBA6;
@@ -164,12 +174,21 @@
     cursor:default;
   }
   .cal-day.empty:hover{ transform:none; }
-  .cal-day.today{ box-shadow:inset 0 0 0 2px var(--ink); }
+  .cal-day.today::after{
+    content:'';
+    position:absolute;
+    bottom:5px;
+    left:50%;
+    transform:translateX(-50%);
+    width:4px; height:4px;
+    border-radius:50%;
+    background:currentColor;
+  }
 
   .cal-legend{
     display:flex;
     gap:16px;
-    margin-top:16px;
+    margin-top:20px;
     font-size:11.5px;
     color:var(--muted);
   }
@@ -182,8 +201,10 @@
     .dash-shell{ padding:28px 16px 40px; }
     .dash-welcome h1{ font-size:21px; }
     .dash-section{ padding:20px 18px 18px; }
-    .cal-day{ font-size:12px; border-radius:7px; }
-    .cal-weekdays span{ font-size:9.5px; }
+    .calendar-card h2{ font-size:20px; }
+    .cal-nav-btn{ width:34px; height:34px; }
+    .cal-day{ font-size:12.5px; }
+    .cal-weekdays span{ font-size:10.5px; }
   }
 </style>
 </head>
@@ -260,7 +281,7 @@
   const dashShell = document.getElementById('dashShell');
   const gateMessage = document.getElementById('gateMessage');
 
-  const WEEKDAY_LETTERS = ['S','M','T','W','T','F','S'];
+  const WEEKDAY_LETTERS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   const today = new Date();
@@ -295,9 +316,9 @@
         <p>Here's your study activity.</p>
       </div>
 
-      <section class="dash-section">
-        <h2>Daily Study Calendar</h2>
-        <p class="section-note">Tap a day to mark it green once you've studied. Any day you haven't marked yet stays red — this is a simple yes/no check-in, separate from the detailed hour-by-hour tracking in Study Time Tracker (see the nav above).</p>
+      <section class="dash-section calendar-card">
+        <h2>Calendar</h2>
+        <p class="section-note">Tap a day to mark it studied — green means done, red means not yet.</p>
         <div class="cal-month-bar">
           <button class="cal-nav-btn" id="calPrev" aria-label="Previous month">‹</button>
           <span class="cal-month-label" id="calMonthLabel"></span>
